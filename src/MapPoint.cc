@@ -332,65 +332,64 @@ void MapPoint::ComputeDistinctiveDescriptors()
     // Retrieve all observed descriptors
     vector<cv::Mat> vDescriptors;
 
-    map<KeyFrame*,tuple<int,int>> observations;
+    map<KeyFrame*, tuple<int, int>> observations;
 
     {
         unique_lock<mutex> lock1(mMutexFeatures);
-        if(mbBad)
+        if (mbBad)
             return;
-        observations=mObservations;
+        observations = mObservations;
     }
 
-    if(observations.empty())
+    if (observations.empty())
         return;
 
     vDescriptors.reserve(observations.size());
 
-    for(map<KeyFrame*,tuple<int,int>>::iterator mit=observations.begin(), mend=observations.end(); mit!=mend; mit++)
+    for (map<KeyFrame*, tuple<int, int>>::iterator mit = observations.begin(), mend = observations.end(); mit != mend; mit++)
     {
         KeyFrame* pKF = mit->first;
 
-        if(!pKF->isBad()){
-            tuple<int,int> indexes = mit -> second;
+        if (!pKF->isBad()) {
+            tuple<int, int> indexes = mit->second;
             int leftIndex = get<0>(indexes), rightIndex = get<1>(indexes);
 
-            if(leftIndex != -1){
+            if (leftIndex != -1) {
                 vDescriptors.push_back(pKF->mDescriptors.row(leftIndex));
             }
-            if(rightIndex != -1){
+            if (rightIndex != -1) {
                 vDescriptors.push_back(pKF->mDescriptors.row(rightIndex));
             }
         }
     }
 
-    if(vDescriptors.empty())
+    if (vDescriptors.empty())
         return;
 
     // Compute distances between them
     const size_t N = vDescriptors.size();
 
-    float Distances[N][N];
-    for(size_t i=0;i<N;i++)
+    std::vector<float> Distances(N * N); // Unnecessarily initializes with 0, could be better with new/delete
+    for (size_t i = 0; i < N; i++)
     {
-        Distances[i][i]=0;
-        for(size_t j=i+1;j<N;j++)
+        Distances[i * N + i] = 0;
+        for (size_t j = i + 1; j < N; j++)
         {
-            int distij = ORBmatcher::DescriptorDistance(vDescriptors[i],vDescriptors[j]);
-            Distances[i][j]=distij;
-            Distances[j][i]=distij;
+            int distij = ORBmatcher::DescriptorDistance(vDescriptors[i], vDescriptors[j]);
+            Distances[i * N + j] = distij;
+            Distances[j * N + i] = distij;
         }
     }
 
     // Take the descriptor with least median distance to the rest
     int BestMedian = INT_MAX;
     int BestIdx = 0;
-    for(size_t i=0;i<N;i++)
+    for (size_t i = 0; i < N; i++)
     {
-        vector<int> vDists(Distances[i],Distances[i]+N);
-        sort(vDists.begin(),vDists.end());
-        int median = vDists[0.5*(N-1)];
+        sort(Distances.begin() + i * N, Distances.begin() + i * N + N);
+        int median = Distances[i * N + 0.5 * (N - 1)];
 
-        if(median<BestMedian)
+        if (median < BestMedian)
         {
             BestMedian = median;
             BestIdx = i;
