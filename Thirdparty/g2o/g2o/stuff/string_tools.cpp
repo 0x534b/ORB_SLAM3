@@ -36,6 +36,7 @@
 #include <cstdio>
 #include <iostream>
 #include <iterator>
+#include "asprintf.h"
 
 #if (defined (UNIX) || defined(CYGWIN)) && !defined(ANDROID)
 #include <wordexp.h>

@@ -48,11 +48,8 @@ MESSAGE(${OpenCV_VERSION})
 
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS serialization)
 SET(OPENSSL_CMAKE_DIR "" CACHE PATH "Path to the OpenSSL CMake downloader")
-
-add_subdirectory(${OPENSSL_CMAKE_DIR})
-target_link_libraries(ORB_SLAM3 SHARED ssl crypto)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
@@ -61,12 +58,11 @@ ${PROJECT_SOURCE_DIR}/include/CameraModels
 ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
 ${Boost_INCLUDE_DIRS}
-${OPENSSL_INCLUDE_DIR}
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
-add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME} STATIC
 src/System.cc
 src/Tracking.cc
 src/LocalMapping.cc
@@ -123,16 +119,21 @@ include/MLPnPsolver.h
 include/TwoViewReconstruction.h
 src/TwoViewReconstruction.cc)
 
+if (WIN32)
+	include_directories(${PROJECT_SOURCE_DIR}/winutil)
+	target_sources(${PROJECT_NAME} PRIVATE winutil/getopt.c winutil/usleep.cpp)
+endif (WIN32)
+
 add_subdirectory(Thirdparty/g2o)
 
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
-${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
-${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
--lboost_serialization
--lcrypto
+${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/DBoW2.lib
+${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/g2o.lib
+${BOOST_SERIALIZATION_LIBRARY}
+Boost::serialization
 )
 
 
