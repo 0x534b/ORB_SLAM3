@@ -30,6 +30,10 @@
 #include <typeinfo>
 #include <cassert>
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#include <algorithm>
+#endif
+
 using namespace std;
 
 namespace g2o {

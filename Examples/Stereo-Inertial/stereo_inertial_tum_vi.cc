@@ -28,6 +28,10 @@
 #include<System.h>
 #include "ImuTypes.h"
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#include <getopt.h>
+#endif
+
 using namespace std;
 
 void LoadImages(const string &strPathLeft, const string &strPathRight, const string &strPathTimes,

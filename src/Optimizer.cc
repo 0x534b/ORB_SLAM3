@@ -2207,7 +2207,7 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
                 mspFinalObservationKFs[pKFi] = finalNumberMPs;
             }
 
-            f_lba.close();
+            // f_lba.close();
         }
     }
 

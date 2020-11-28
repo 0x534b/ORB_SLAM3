@@ -121,7 +121,8 @@ src/TwoViewReconstruction.cc)
 
 if (WIN32)
 	include_directories(${PROJECT_SOURCE_DIR}/winutil)
-	target_sources(${PROJECT_NAME} PRIVATE winutil/getopt.c winutil/usleep.cpp)
+   # target_sources(${PROJECT_NAME} PRIVATE winutil/getopt.c winutil/usleep.cpp)
+   add_definitions(/bigobj)
 endif (WIN32)
 
 add_subdirectory(Thirdparty/g2o)
