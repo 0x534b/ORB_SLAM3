@@ -29,7 +29,7 @@
 #include "ImuTypes.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-#include <winutil/getopt.h>
+#include <winutil/usleep.h>
 #endif
 
 using namespace std;
